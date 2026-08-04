@@ -1,0 +1,8 @@
+# Client-side routing fallback for Cloudflare Pages (and Netlify).
+#
+# The app uses React Router, so /admin/bookings exists only in the browser --
+# there is no such file on disk. Without this rule a refresh or a pasted deep
+# link returns 404. The 200 keeps the URL intact instead of redirecting.
+#
+# Vite copies public/ into dist/, so this ships automatically with the build.
+/*  /index.html  200
