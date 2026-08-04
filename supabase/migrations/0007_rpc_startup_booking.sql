@@ -10,10 +10,17 @@
 -- taken, never by whom. That is also why this is an RPC rather than a
 -- subscribable view — a realtime payload of the bookings table would leak it.
 -- ---------------------------------------------------------------------------
+-- VOLATILE, not STABLE: this reads like a pure query, but startup_id_from_token()
+-- writes — it touches last_seen_at on every call. PostgREST runs STABLE functions
+-- in a READ ONLY transaction, so marking this STABLE makes every single call fail
+-- with SQLSTATE 25006 "cannot execute UPDATE in a read-only transaction", taking
+-- the whole startup dashboard down. The other three token-consuming RPCs
+-- (startup_session_info, book_slot, cancel_my_booking) are volatile for this
+-- same reason.
 create or replace function public.get_startup_dashboard(p_token text)
 returns jsonb
 language plpgsql
-stable
+volatile
 security definer
 set search_path = ''
 as $$
