@@ -1,0 +1,58 @@
+@import './fonts.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-canvas font-sans text-navy antialiased;
+    /* Arabic numerals render as Western digits for time/counters, which is what
+       the source decks use (e.g. "5-7", "13 عامًا"). */
+    font-variant-numeric: lining-nums;
+  }
+
+  /* Focus ring — visible for keyboard users, invisible for mouse users. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-maroon/60 ring-offset-2 ring-offset-canvas;
+  }
+
+  ::selection {
+    @apply bg-maroon/15 text-navy;
+  }
+
+  /* Numeric inputs: hide spinners (the 4-digit access code field). */
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer utilities {
+  /* Latin fragments inside Arabic prose (mentor org names, LinkedIn handles)
+     need explicit LTR embedding or punctuation lands on the wrong side. */
+  .ltr-embed {
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
