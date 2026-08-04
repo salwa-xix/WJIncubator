@@ -71,7 +71,7 @@ export default function AdminStartups() {
         <Card padded={false} className="overflow-x-auto">
           <table className="w-full min-w-max border-collapse text-sm">
             <thead>
-              <tr className="border-b border-line bg-canvas/70">
+              <tr className="border-b border-line bg-canvas-sunk">
                 <th scope="col" className="px-4 py-3 text-start font-bold text-navy">الشركة</th>
                 <th scope="col" className="px-4 py-3 text-start font-bold text-navy">القطاع</th>
                 <th scope="col" className="px-4 py-3 text-center font-bold text-navy">الحجوزات</th>
@@ -88,7 +88,7 @@ export default function AdminStartups() {
                       {s.logo_url ? (
                         <img src={s.logo_url} alt="" className="size-9 rounded object-contain" />
                       ) : (
-                        <div className="grid size-9 place-items-center rounded bg-canvas text-xs font-bold text-navy/30">
+                        <div className="grid size-9 place-items-center rounded bg-canvas text-xs font-bold text-muted-soft">
                           {s.name_ar.charAt(0)}
                         </div>
                       )}

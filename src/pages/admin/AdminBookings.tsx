@@ -168,7 +168,7 @@ export default function AdminBookings() {
         <Card padded={false} className="overflow-x-auto">
           <table className="w-full min-w-max border-collapse text-sm">
             <thead>
-              <tr className="border-b border-line bg-canvas/70 text-start">
+              <tr className="border-b border-line bg-canvas-sunk text-start">
                 <th scope="col" className="px-4 py-3 text-start font-bold text-navy">الشركة</th>
                 <th scope="col" className="px-4 py-3 text-start font-bold text-navy">المرشد</th>
                 <th scope="col" className="px-4 py-3 text-start font-bold text-navy">الوقت</th>

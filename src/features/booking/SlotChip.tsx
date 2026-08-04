@@ -14,11 +14,23 @@ const LABELS: Record<DashboardSlot['state'], string> = {
   closed: 'مغلق',
 }
 
+/**
+ * Slot states exactly as the reference draws them:
+ *  - available — white, hairline border, navy time, muted label
+ *  - mine      — pale maroon fill, maroon border, maroon text
+ *  - booked    — faint sunken fill, faint text, no strike-through
+ *  - closed    — same as booked
+ *
+ * Note there is no strike-through in the reference. It was removed rather than
+ * kept "for clarity": a line through a time is hard to read at 13px, and the
+ * fill plus the "محجوز" label already carry the state.
+ */
 const STYLES: Record<DashboardSlot['state'], string> = {
-  available: 'border-sky bg-sky/15 text-navy hover:bg-sky/35 hover:border-sky-deep cursor-pointer',
-  mine: 'border-maroon/35 bg-maroon/10 text-maroon cursor-default',
-  booked: 'border-line bg-canvas text-muted/70 cursor-not-allowed line-through decoration-muted/40',
-  closed: 'border-line bg-canvas text-muted/60 cursor-not-allowed',
+  available:
+    'border-line bg-white text-navy hover:border-maroon/40 hover:bg-maroon-tint/60 cursor-pointer',
+  mine: 'border-maroon-soft bg-maroon-tint text-maroon cursor-default',
+  booked: 'border-line-soft bg-canvas-sunk text-muted-faint cursor-not-allowed',
+  closed: 'border-line-soft bg-canvas-sunk text-muted-faint cursor-not-allowed',
 }
 
 export function SlotChip({ slot, disabled = false, onSelect }: Props) {
@@ -35,13 +47,17 @@ export function SlotChip({ slot, disabled = false, onSelect }: Props) {
       onClick={() => interactive && onSelect(slot)}
       aria-label={`${slot.start_time} — ${LABELS[slot.state]}`}
       className={cn(
-        'flex min-w-[5.25rem] flex-col items-center gap-0.5 rounded-chip border px-3 py-2 text-sm font-semibold transition-colors',
+        'flex min-w-[5.5rem] flex-col items-center gap-1 rounded-chip border px-4 py-2.5 transition-colors duration-200 ease-enterprise',
         STYLES[slot.state],
         blocked && 'cursor-not-allowed opacity-55',
       )}
     >
-      <span className="ltr-embed tabular-nums">{slot.start_time}</span>
-      <span className="text-[0.68rem] font-medium opacity-80">{LABELS[slot.state]}</span>
+      <span className="ltr-embed text-[0.95rem] font-bold tabular-nums leading-none">
+        {slot.start_time}
+      </span>
+      <span className="text-[0.7rem] font-medium leading-none opacity-80">
+        {LABELS[slot.state]}
+      </span>
     </button>
   )
 }

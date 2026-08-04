@@ -2,6 +2,8 @@ import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Card } from '@/components/ui/Card'
+import { Chip } from '@/components/ui/Chip'
+import { BandPattern } from '@/components/brand/BandPattern'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Button } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Alert'
@@ -97,7 +99,7 @@ export default function AdminOverview() {
         </Alert>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatTile label="الشركات المفعّلة" value={`${stats?.active_startups ?? 0} / ${stats?.total_startups ?? 0}`} />
         <StatTile label="مرشدو الجلسة المفعّلون" value={stats?.session_mentors ?? 0} hint={`من ${stats?.total_mentors ?? 0} ملف مرشد`} />
         <StatTile label="الحجوزات المؤكدة" value={stats?.confirmed_bookings ?? 0} tone="maroon" />
@@ -108,28 +110,42 @@ export default function AdminOverview() {
         <StatTile label="مواعيد مغلقة" value={stats?.closed_slots ?? 0} tone="muted" />
       </div>
 
-      <Card className="mt-6">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className="text-base font-bold text-navy">نسبة الإشغال</h2>
-          <p className="text-sm font-bold tabular-nums text-navy">{fillRate}%</p>
+      {/* The reference gives occupancy its own deep-navy panel — the only dark
+          surface in the page body — with the label and the percentage on one
+          line and a maroon-to-rose gradient fill. It reads as a summary band
+          rather than one more white card in the stack. */}
+      <section className="relative mt-6 overflow-hidden rounded-panel bg-navy-darker p-6 sm:p-7">
+        <BandPattern />
+        <div className="relative">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-base font-bold text-white">نسبة الإشغال</h2>
+            <p className="text-xl font-extrabold tabular-nums text-sky">{fillRate}%</p>
+          </div>
+          <div
+            className="mt-4 h-2.5 overflow-hidden rounded-full bg-white/10"
+            role="img"
+            aria-label={`نسبة الإشغال ${fillRate}%`}
+          >
+            <div
+              className="h-full rounded-full bg-gradient-to-l from-maroon to-maroon-wash transition-all duration-500 ease-enterprise"
+              style={{ width: `${fillRate}%` }}
+            />
+          </div>
         </div>
-        <div className="mt-3 h-3 overflow-hidden rounded-full bg-canvas" role="img" aria-label={`نسبة الإشغال ${fillRate}%`}>
-          <div className="h-full rounded-full bg-maroon transition-all" style={{ width: `${fillRate}%` }} />
-        </div>
-      </Card>
+      </section>
 
-      <section className="mt-8">
-        <h2 className="mb-4 text-lg font-bold text-navy">آخر العمليات</h2>
+      <section className="mt-9">
+        <h2 className="mb-4 text-display-sm font-extrabold text-navy">آخر العمليات</h2>
         {audit && audit.length > 0 ? (
           <Card padded={false} className="overflow-hidden">
             <ul className="divide-y divide-line">
               {audit.map((e) => (
-                <li key={e.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+                <li key={e.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-6">
                   <div className="flex items-center gap-3">
-                    <span className="rounded-full bg-canvas px-2.5 py-0.5 text-[0.68rem] font-bold text-muted">
+                    <Chip tone="entity">
                       {e.actor === 'admin' ? 'مشرف' : e.actor === 'startup' ? 'شركة' : 'النظام'}
-                    </span>
-                    <span className="text-sm font-medium text-navy">
+                    </Chip>
+                    <span className="text-sm font-bold text-navy">
                       {ACTION_LABELS[e.action] ?? e.action}
                     </span>
                   </div>

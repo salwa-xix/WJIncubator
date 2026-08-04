@@ -60,9 +60,15 @@ export default function StartupLogin() {
 
   return (
     <AuthSplitLayout>
-      <div className="mb-8 text-center lg:text-start">
-        <h1 className="text-4xl font-bold text-navy">مرحبًا بك</h1>
-        <p className="mt-3 text-base leading-relaxed text-muted">
+      {/* The reference sets the eyebrow as an OUTLINED maroon pill, not plain
+          text: 1.5px border, fully round, tracked uppercase. Then a large navy
+          headline and muted support copy. */}
+      <div className="mb-9 text-center lg:text-start">
+        <span className="inline-flex items-center rounded-full border-[1.5px] border-maroon px-4 py-1.5 text-eyebrow font-bold uppercase text-maroon">
+          Startup Access
+        </span>
+        <h1 className="mt-5 text-[2.75rem] font-extrabold leading-[1.2] text-navy">مرحبًا بك</h1>
+        <p className="mt-4 max-w-[22rem] text-[1.05rem] leading-relaxed text-muted lg:mx-0">
           اختر شركتك الناشئة وأدخل الرمز السري المخصص لك للمتابعة.
         </p>
       </div>
@@ -70,9 +76,9 @@ export default function StartupLogin() {
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="rounded-card border border-line/70 bg-white p-6 shadow-card sm:p-7"
+        className="rounded-hero bg-white p-7 shadow-hero sm:p-9"
       >
-        <div className="space-y-5">
+        <div className="space-y-6">
           {!isSupabaseConfigured && (
             <Alert tone="warning" title="لم يتم ربط قاعدة البيانات">
               أضف بيانات Supabase في ملف <span className="ltr-embed font-mono">.env</span> لتفعيل
@@ -87,6 +93,7 @@ export default function StartupLogin() {
             disabled={isLoading || !isSupabaseConfigured}
             invalid={Boolean(error) && !startupId}
             autoComplete="organization"
+            icon={<IconBuilding />}
           >
             <option value="">{isLoading ? 'جارٍ التحميل…' : 'اختر الشركة'}</option>
             {startups.map((s) => (
@@ -112,6 +119,7 @@ export default function StartupLogin() {
             disabled={!isSupabaseConfigured}
             invalid={Boolean(error)}
             reveal={{ shown, onToggle: () => setShown((v) => !v) }}
+            icon={<IconKey />}
           />
 
           {error && <Alert tone="error">{error}</Alert>}
@@ -122,7 +130,7 @@ export default function StartupLogin() {
             block
             loading={submitting}
             disabled={!isSupabaseConfigured}
-            className="mt-1"
+            className="mt-2"
           >
             دخول
             <svg
@@ -145,5 +153,28 @@ export default function StartupLogin() {
         للحصول على الرمز السري، الرجاء التواصل مع فريق المنظمين.
       </p>
     </AuthSplitLayout>
+  )
+}
+
+/* Field glyphs, traced from the reference: 1.6 stroke so they sit lighter than
+   the bold labels beside them, and no fill, so they read as UI not content. */
+
+function IconBuilding() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}
+         strokeLinecap="round" strokeLinejoin="round" className="size-5">
+      <path d="M3 21h18M5 21V6a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v15M13 21V10h5a1 1 0 0 1 1 1v10" />
+      <path d="M8 9h2M8 13h2M8 17h2M16 14h1M16 17h1" />
+    </svg>
+  )
+}
+
+function IconKey() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}
+         strokeLinecap="round" strokeLinejoin="round" className="size-5">
+      <circle cx="8" cy="15" r="4" />
+      <path d="m10.8 12.2 8.2-8.2M17 6l2 2M14 9l2 2" />
+    </svg>
   )
 }
