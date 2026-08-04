@@ -3,11 +3,11 @@ import { useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { FullPageSpinner } from '@/components/ui/FullPageSpinner'
 import { Alert } from '@/components/ui/Alert'
-import { BandPattern } from '@/components/brand/BandPattern'
-import { Avatar } from '@/components/ui/Avatar'
+import { LeafPattern } from '@/components/brand/LeafPattern'
 import { QuotaMeter } from '@/features/booking/QuotaMeter'
 import { MentorCard } from '@/features/booking/MentorCard'
 import { MyBookings } from '@/features/booking/MyBookings'
@@ -85,53 +85,42 @@ export default function StartupDashboard() {
 
   return (
     <div className="min-h-dvh">
-      <header className="relative overflow-hidden bg-navy-deep">
-        <BandPattern />
+      <header className="relative overflow-hidden bg-navy">
+        <LeafPattern rows={3} cols={10} className="absolute -top-10 start-0 w-[120%] text-white/[0.06]" />
         <div className="relative mx-auto w-full max-w-6xl px-5 py-6 sm:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="ltr-embed text-xs font-semibold text-white/55">
-              WJIncubator · <span className="font-bold">منصّة الإرشاد</span>
-            </p>
-            <Button variant="onNavy" size="sm" onClick={() => void signOut()}>
-              خروج
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.8}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="size-4 rtl:rotate-180"
-              >
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
-              </svg>
-            </Button>
-          </div>
-
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              {/* A rounded square, not a circle: the reference reserves circles
-                  for people and squircles for organisations. */}
-              <Avatar
-                name={startup?.name_ar}
-                src={startup?.logo_url}
-                shape="squircle"
-                tone="onNavy"
-                size="lg"
-              />
+              {startup?.logo_url ? (
+                <img
+                  src={startup.logo_url}
+                  alt=""
+                  className="size-12 rounded-xl bg-white object-contain p-1.5"
+                />
+              ) : (
+                <div className="grid size-12 place-items-center rounded-xl bg-white/10 text-lg font-bold text-white/70">
+                  {startup?.name_ar?.charAt(0)}
+                </div>
+              )}
               <div>
-                <h1 className="text-xl font-bold text-white">{startup?.name_ar}</h1>
+                <h1 className="text-lg font-bold text-white">{startup?.name_ar}</h1>
                 {startup?.name_en && (
-                  <p className="ltr-embed mt-1 text-sm text-white/55">{startup.name_en}</p>
+                  <p className="ltr-embed text-sm text-white/55">{startup.name_en}</p>
                 )}
               </div>
             </div>
-
-            {quota && (
-              <QuotaMeter {...quota} date={data?.session?.session_date} />
-            )}
+            <Button variant="secondary" size="sm" onClick={() => void signOut()}>
+              خروج
+            </Button>
           </div>
+
+          {quota && (
+            <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-white/10 pt-5">
+              <QuotaMeter {...quota} />
+              {data?.session?.session_date && (
+                <p className="ltr-embed text-sm text-white/55">{data.session.session_date}</p>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
@@ -151,8 +140,8 @@ export default function StartupDashboard() {
         ) : (
           <>
             <section className="mb-12">
-              <div className="mb-5 flex flex-wrap items-baseline justify-between gap-3">
-                <h2 className="text-display-sm font-extrabold text-navy">حجوزاتي</h2>
+              <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
+                <h2 className="text-xl font-bold text-navy">حجوزاتي</h2>
                 {quota && (
                   <p className="text-sm text-muted">
                     <span className="tabular-nums font-semibold text-navy">{quota.used}</span> من{' '}
@@ -164,8 +153,8 @@ export default function StartupDashboard() {
             </section>
 
             <section>
-              <div className="mb-5 flex flex-wrap items-baseline justify-between gap-3">
-                <h2 className="text-display-sm font-extrabold text-navy">المرشدون</h2>
+              <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
+                <h2 className="text-xl font-bold text-navy">المرشدون</h2>
                 {totals.mentors > 0 && (
                   <p className="text-sm text-muted">
                     <span className="tabular-nums">{totals.mentors}</span> مرشدًا ·{' '}
@@ -209,7 +198,12 @@ export default function StartupDashboard() {
           </>
         )}
 
-
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-3 text-center">
+          <Badge tone="sky">متاح</Badge>
+          <Badge tone="maroon">حجزك</Badge>
+          <Badge tone="neutral">محجوز</Badge>
+          <Badge tone="neutral">مغلق</Badge>
+        </div>
       </main>
 
       <ConfirmBookingModal

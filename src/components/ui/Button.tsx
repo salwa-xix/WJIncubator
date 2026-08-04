@@ -1,6 +1,6 @@
 import { cn } from '@/lib/cn'
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'onNavy'
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type Size = 'sm' | 'md' | 'lg'
 
 type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -11,25 +11,17 @@ type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   block?: boolean
 }
 
-/**
- * Sizes and radii follow the reference: the login CTA is a 60px maroon block at
- * the field radius, and secondary controls are pills. `onNavy` is the treatment
- * the reference uses for "خروج" and the email badge inside a navy band — a
- * transparent pill with a hairline white border, which is not the same thing as
- * `secondary` on canvas.
- */
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-maroon text-white hover:bg-maroon-deep active:bg-maroon-deep shadow-cta hover:shadow-cta-hover',
-  secondary: 'bg-white text-navy border border-line hover:border-line-strong hover:bg-canvas',
-  ghost: 'bg-transparent text-navy hover:bg-navy-tint',
-  danger: 'bg-white text-maroon border border-danger-line hover:bg-danger-tint',
-  onNavy: 'bg-white/[0.07] text-white border border-white/25 hover:bg-white/[0.14]',
+  primary: 'bg-maroon text-white hover:bg-maroon-deep active:bg-maroon-deep shadow-sm',
+  secondary: 'bg-white text-navy border border-line hover:border-navy/30 hover:bg-canvas',
+  ghost: 'bg-transparent text-navy hover:bg-navy/5',
+  danger: 'bg-white text-maroon border border-maroon/25 hover:bg-maroon/5',
 }
 
 const SIZES: Record<Size, string> = {
-  sm: 'h-10 px-4 text-sm rounded-full gap-2',
-  md: 'h-12 px-5 text-[0.95rem] rounded-field gap-2',
-  lg: 'h-[3.75rem] px-7 text-[1.05rem] rounded-field gap-2.5',
+  sm: 'h-9 px-3.5 text-sm rounded-chip gap-1.5',
+  md: 'h-11 px-5 text-[0.95rem] rounded-chip gap-2',
+  lg: 'h-14 px-7 text-lg rounded-card gap-2.5',
 }
 
 export function Button({
@@ -48,8 +40,8 @@ export function Button({
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       className={cn(
-        'inline-flex items-center justify-center font-bold transition-all duration-200 ease-enterprise',
-        'disabled:cursor-not-allowed disabled:opacity-55 disabled:shadow-none',
+        'inline-flex items-center justify-center font-semibold transition-colors duration-150',
+        'disabled:cursor-not-allowed disabled:opacity-55',
         VARIANTS[variant],
         SIZES[size],
         block && 'w-full',

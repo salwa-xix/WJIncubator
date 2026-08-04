@@ -38,7 +38,7 @@ export function ConfirmBookingModal({ target, submitting, error, onConfirm, onCl
                 className="size-14 shrink-0 rounded-full border border-line object-cover"
               />
             ) : (
-              <div className="grid size-14 shrink-0 place-items-center rounded-full border border-line bg-white text-lg font-bold text-muted-soft">
+              <div className="grid size-14 shrink-0 place-items-center rounded-full border border-line bg-white text-lg font-bold text-navy/25">
                 {target.mentor.name_ar.charAt(0)}
               </div>
             )}

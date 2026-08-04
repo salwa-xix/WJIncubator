@@ -153,7 +153,7 @@ export default function AdminMentors() {
               {m.image_url ? (
                 <img src={m.image_url} alt="" className="size-14 rounded-full object-cover" />
               ) : (
-                <div className="grid size-14 place-items-center rounded-full bg-canvas font-bold text-muted-soft">
+                <div className="grid size-14 place-items-center rounded-full bg-canvas font-bold text-navy/25">
                   {m.name_ar.charAt(0)}
                 </div>
               )}

@@ -2,21 +2,13 @@ import { cn } from '@/lib/cn'
 
 type Tone = 'navy' | 'maroon' | 'sky' | 'neutral' | 'success' | 'warning'
 
-/**
- * Onto the sampled palette. `emerald-*`/`amber-*` are Tailwind defaults and read
- * as a different product beside the reference colours.
- *
- * New work should prefer `Chip`, which carries the reference's own label roles
- * (success / rose / entity / solid / status). Badge stays for the call sites that
- * still use its tone names.
- */
 const TONES: Record<Tone, string> = {
   navy: 'bg-navy text-white',
-  maroon: 'bg-maroon-wash text-maroon border border-danger-line',
-  sky: 'bg-sky-chip text-navy',
-  neutral: 'bg-canvas-sunk text-muted border border-line',
-  success: 'bg-success-tint text-success border border-success-line',
-  warning: 'bg-warning-tint text-warning border border-warning-line',
+  maroon: 'bg-maroon/10 text-maroon',
+  sky: 'bg-sky/25 text-navy',
+  neutral: 'bg-canvas text-muted border border-line',
+  success: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  warning: 'bg-amber-50 text-amber-700 border border-amber-200',
 }
 
 type Props = React.HTMLAttributes<HTMLSpanElement> & { tone?: Tone }

@@ -2,18 +2,11 @@ import { cn } from '@/lib/cn'
 
 type Tone = 'error' | 'warning' | 'info' | 'success'
 
-/**
- * Tones taken from the reference. The info alert on the dashboard is the one
- * shown there: a pale blue fill with a light blue hairline and navy text — not
- * blue text, which would fight the body copy around it. `amber-*`/`emerald-*`
- * are gone; they are Tailwind defaults and read as a different product beside
- * the sampled palette.
- */
 const TONES: Record<Tone, string> = {
-  error: 'bg-danger-tint text-maroon border-danger-line',
-  warning: 'bg-warning-tint text-warning border-warning-line',
-  info: 'bg-sky-wash text-navy border-sky-line',
-  success: 'bg-success-tint text-success border-success-line',
+  error: 'bg-maroon/[0.06] text-maroon border-maroon/25',
+  warning: 'bg-amber-50 text-amber-800 border-amber-300',
+  info: 'bg-sky-wash text-navy border-sky/50',
+  success: 'bg-emerald-50 text-emerald-800 border-emerald-300',
 }
 
 const ICONS: Record<Tone, string> = {
@@ -39,7 +32,7 @@ export function Alert({ tone = 'error', title, children, className }: Props) {
     <div
       role="alert"
       className={cn(
-        'flex items-start gap-3 rounded-field border px-4 py-3.5 text-sm leading-relaxed animate-fade-in',
+        'flex items-start gap-3 rounded-chip border px-4 py-3 text-sm leading-relaxed animate-fade-in',
         TONES[tone],
         className,
       )}
