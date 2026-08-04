@@ -1,0 +1,23 @@
+node_modules
+dist
+dist-ssr
+*.local
+
+# Secrets — never commit. Only .env.example belongs in the repo.
+.env
+.env.*
+!.env.example
+
+# Assets extracted from the source PDFs are COMMITTED: the PDFs themselves are
+# not in the repo, so without them a fresh clone would render no portraits or
+# logos. Regenerate with scripts/extract_assets.py.
+
+.DS_Store
+*.log
+npm-debug.log*
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# TypeScript incremental build artifacts
+*.tsbuildinfo
