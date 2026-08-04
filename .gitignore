@@ -7,6 +7,9 @@ dist-ssr
 .env
 .env.*
 !.env.example
+# Public build-time values only (VITE_* anon key + URL). Everything else stays
+# ignored above. See the header inside the file.
+!.env.production
 
 # Assets extracted from the source PDFs are COMMITTED: the PDFs themselves are
 # not in the repo, so without them a fresh clone would render no portraits or
