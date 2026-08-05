@@ -22,7 +22,7 @@ language sql immutable as $$ select coalesce(p->>'code', case when (p->>'ok')::b
 -- ---------------------------------------------------------------------------
 do $$ begin raise notice E'\n=== SEED INTEGRITY ==='; end $$;
 
-select pg_temp.assert((select count(*) from public.startups) = 19, '19 startups seeded');
+select pg_temp.assert((select count(*) from public.startups) = 20, '20 startups seeded');
 select pg_temp.assert((select count(*) from public.mentors)  = 17, '17 mentor profiles seeded');
 select pg_temp.assert((select count(*) from public.mentor_organizations) = 27, '27 mentor organizations seeded');
 select pg_temp.assert((select count(distinct start_time) from public.slots) = 6, 'six 20-minute slots per mentor');

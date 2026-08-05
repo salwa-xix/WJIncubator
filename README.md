@@ -172,7 +172,7 @@ refresh on `/admin/bookings` 404s.
 4. **Generate the slot grid** — Admin → المواعيد → إنشاء شبكة المواعيد.
 5. **Adjust individual slots** — close, delete, or add per mentor.
 6. **Issue access codes** — `psql "$SUPABASE_DB_URL" -f supabase/seed/05_issue_codes.sql`.
-   Prints all 19 codes **once**; capture the output and distribute them.
+   Prints all 20 codes **once**; capture the output and distribute them.
    Alternatively reset one at a time from Admin → الشركات.
 7. **Open the session** — Admin → الجلسة → فتح الجلسة. Refused unless a date
    and slots exist.
@@ -256,9 +256,9 @@ attempts genuinely overlap:
 
 | Scenario | Result |
 | -------- | ------ |
-| 19 startups race for one slot | exactly 1 wins, 18 clean `SLOT_TAKEN` |
+| 20 startups race for one slot | exactly 1 wins, 19 clean `SLOT_TAKEN` |
 | One startup fires 6 bookings at once | the cap of 3 holds |
-| Full storm, all 19 at once | no double-booked slot, no over-cap startup, no time clash, no duplicate mentor, no drift |
+| Full storm, all 20 at once | no double-booked slot, no over-cap startup, no time clash, no duplicate mentor, no drift |
 
 `supabase/test/00_local_shim.sql` recreates just enough of Supabase's `auth`
 schema and roles to run the real migrations unmodified locally. It is never
@@ -287,16 +287,15 @@ Everything real comes from the uploaded source files. **Nothing is invented.**
 
 | Data | Source | Count |
 | ---- | ------ | ----- |
-| Startups | `Incubator_Startup_Profiles.pdf` (pages 1–18) + `Company.pdf` | 19 |
+| Startups | `Incubator_Startup_Profiles.pdf` (19) + `Company.pdf` (1) | 20 |
 | Mentor profiles | `مرشدين المعسكر.pdf` (14) + `Company.pdf` (3) | 17 |
 | Mentor organizations | `مرشدين المعسكر.pdf` | 27 |
-| Images extracted | all three PDFs | 61 |
+| Images extracted | all three PDFs | 62 |
 
-`Company.pdf` is a later addendum. It adds three mentors
-(د. سلطان الحياني · معاذ العديمي · د. عبدالرحمن حريري) and replaces the deck's
-19th company, **Floraex / فلوراكس**, with **نقطة / NKTA**. Floraex is deleted
-rather than renamed, so نقطة never inherits its profile or its access code — see
-the guard at the top of `supabase/seed/01_startups.sql`.
+`Company.pdf` is a later addendum. It **adds** three mentors
+(د. سلطان الحياني · معاذ العديمي · د. عبدالرحمن حريري) and **نقطة / NKTA** as a
+20th company. It replaces nothing — every company from the original deck,
+Floraex / فلوراكس included, stays on the roster.
 
 Known data-quality gaps in the sources are carried over **unchanged and
 flagged**, because correcting them is the organiser's decision:
@@ -318,7 +317,7 @@ CartiHeal's slide sets its wordmark in type rather than placing an image, so its
 
 ```
 ├─ public/
-│  ├─ assets/           61 images extracted from the source PDFs
+│  ├─ assets/           62 images extracted from the source PDFs
 │  ├─ fonts/            IBM Plex Sans Arabic, subset-split (SIL OFL 1.1)
 │  └─ favicon.svg
 ├─ scripts/
@@ -351,6 +350,6 @@ Vite · React 18 · TypeScript (strict) · Tailwind · React Router · TanStack 
 **No Edge Functions** — the entire backend is SQL migrations. Fewer moving
 parts, one deploy target, and the whole rule engine is testable offline.
 
-The admin area is lazy-loaded: 19 startups hit the booking page at once at the
+The admin area is lazy-loaded: 20 startups hit the booking page at once at the
 start of an event, and they should not download the organiser's tooling to do
 it.

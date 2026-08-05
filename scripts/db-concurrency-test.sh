@@ -7,7 +7,7 @@
 # wall-clock instant before calling book_slot(), so the attempts really do
 # overlap rather than merely being launched in a loop.
 #
-# This is the test the whole design exists to pass: 19 startups competing for a
+# This is the test the whole design exists to pass: every seeded startup competing for a
 # finite slot pool during a live event, where a double-booked mentor is a
 # visible failure in the room.
 #
@@ -56,7 +56,7 @@ SLOT=$(q "select id from public.slots order by mentor_id, start_time limit 1;")
 
 # -----------------------------------------------------------------------------
 echo ""
-echo "=== TEST A — 19 startups race for ONE slot ==="
+echo "=== TEST A — ${#TOKENS[@]} startups race for ONE slot ==="
 FIRE=$(q "select (clock_timestamp() + interval '3 seconds')::text;")
 RESULTS=$(mktemp -d)
 
@@ -115,7 +115,7 @@ rm -rf "$RESULTS"
 
 # -----------------------------------------------------------------------------
 echo ""
-echo "=== TEST C — full storm: all 19 startups, 8 attempts each, at once ==="
+echo "=== TEST C — full storm: all ${#TOKENS[@]} startups, 8 attempts each, at once ==="
 q "delete from public.bookings;" >/dev/null
 FIRE=$(q "select (clock_timestamp() + interval '4 seconds')::text;")
 

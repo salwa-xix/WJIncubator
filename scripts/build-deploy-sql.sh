@@ -9,7 +9,7 @@
 # Output (run in this order in the SQL Editor):
 #   supabase/deploy/01_schema.sql       all 11 migrations
 #   supabase/deploy/02_data.sql         startups, mentors, orgs, assets, session
-#   supabase/deploy/03_issue_codes.sql  generate + PRINT the 19 access codes
+#   supabase/deploy/03_issue_codes.sql  generate + PRINT the 20 access codes
 #
 #   ./scripts/build-deploy-sql.sh
 # =============================================================================

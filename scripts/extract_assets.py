@@ -16,10 +16,10 @@ lower band and attach to whichever card centre they are nearest.
 
 Company.pdf is a later addendum with a different shape — one subject per page,
 one image per page, centred — so it gets its own simple pass rather than being
-forced through the two decks' grid logic. All three files are required: running
-with only the original two would quietly emit a seed missing نقطة's logo and
-two mentor portraits, which is exactly the kind of silence this script exists
-to avoid.
+forced through the two decks' grid logic. It adds a 20th company and three
+mentors; it replaces nothing. All three files are required: running with only
+the original two would quietly emit a seed missing نقطة's logo and two mentor
+portraits, which is exactly the kind of silence this script exists to avoid.
 
 Requires PyMuPDF:  pip install pymupdf
 
@@ -51,15 +51,11 @@ MENTOR_PAGES = [
 ]
 
 # Startup profile slides, one per page, in page order.
-#
-# Stops at 18. The deck's page 19 is Floraex, which Company.pdf replaced with
-# نقطة — so that page is deliberately not read, and نقطة's logo comes from the
-# company pass below instead.
 STARTUP_PAGES = [
     "mabien", "nanoclean", "groupz", "mustahaq", "thella", "senoz-ai",
     "wound-care-ai", "dithar", "medirect", "juthoor", "stetholink",
     "cartiheal", "phagetech", "aquanova", "plstka", "hader", "evinex",
-    "oprato",
+    "oprato", "floraex",
 ]
 
 # Company.pdf: one subject per page, in page order. `kind` picks the table the
@@ -195,15 +191,6 @@ def main():
             f"update public.{table} set {column} = '/assets/{table}/{slug}.png' "
             f"where slug = '{slug}';")
     doc.close()
-
-    # Floraex's images belong to a company that is no longer on the roster.
-    # Deleting them here keeps public/assets/ a mirror of the seed rather than
-    # an append-only pile that nothing ever prunes.
-    for stale in ("floraex.png", "floraex-founder.png"):
-        path = os.path.join(OUT_S, stale)
-        if os.path.exists(path):
-            os.remove(path)
-            print(f"  - removed stale asset startups/{stale} (Floraex → نقطة)")
 
     with open(SEED, "w", encoding="utf-8") as fh:
         fh.write("-- ============================================================\n"

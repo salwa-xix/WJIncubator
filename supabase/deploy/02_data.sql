@@ -17,13 +17,13 @@
 -- SEED — Startups
 -- ============================================================================
 -- Sources of truth:
---   • Incubator_Startup_Profiles.pdf (19 pages, one per company) → rows 1–18
---   • Company.pdf (page 1)                                       → row 19
+--   • Incubator_Startup_Profiles.pdf (19 pages, one per company) → rows 1–19
+--   • Company.pdf (page 1)                                       → row 20
 --
--- Company.pdf replaces the deck's 19th company (Floraex / فلوراكس) with نقطة.
--- It is a one-page cover carrying the name and logo only, so every other
--- column on that row is NULL — the profile fields simply do not exist in the
--- source yet. Every field below is transcribed verbatim. Nothing invented.
+-- Company.pdf ADDS نقطة as a 20th company; it does not replace anything. It is
+-- a one-page cover carrying the name and logo only, so every other column on
+-- that row is NULL — the profile fields simply do not exist in the source yet.
+-- Every field below is transcribed verbatim. Nothing invented.
 --
 -- NOT set here: access_code_hash. Codes do not exist in any source file, so
 -- they are issued separately (see scripts/issue-codes.ts or
@@ -35,42 +35,6 @@
 --
 -- Idempotent: re-running updates the profile text and leaves codes untouched.
 -- ============================================================================
-
--- ---------------------------------------------------------------------------
--- Floraex → نقطة
--- ---------------------------------------------------------------------------
--- Removed rather than renamed in place. It is a different company, and reusing
--- the row would silently carry over Floraex's founder, sector, description,
--- logo and — the one that actually matters — its already-issued access code,
--- handing نقطة a credential that was given to someone else.
---
--- Guarded, because bookings.startup_id is ON DELETE RESTRICT: if Floraex has
--- already booked, an unguarded DELETE aborts the whole seed. In that case the
--- row is archived instead, so the bookings stay auditable and the operator is
--- told what to do about it.
--- ---------------------------------------------------------------------------
-do $$
-declare
-  v_id       uuid;
-  v_bookings integer;
-begin
-  select id into v_id from public.startups where slug = 'floraex';
-  if v_id is null then
-    return;                                   -- already replaced; nothing to do
-  end if;
-
-  select count(*) into v_bookings from public.bookings where startup_id = v_id;
-
-  if v_bookings = 0 then
-    delete from public.startups where id = v_id;
-    raise notice 'Floraex removed — replaced by نقطة (no bookings existed).';
-  else
-    update public.startups set is_active = false where id = v_id;
-    raise notice 'Floraex has % booking(s), so it was archived (is_active = false) '
-                 'rather than deleted. Cancel those bookings and re-run this seed '
-                 'to remove the row outright.', v_bookings;
-  end if;
-end $$;
 
 insert into public.startups
   (sort_order, slug, name_ar, name_en, founder_name, founder_role, stage, hq, linkedin_url, sector, description)
@@ -147,10 +111,14 @@ values
    'الإطلاق المبكر', 'جدة', 'https://linkedin.com/in/marwan-raffa', 'قطاع تقنيات الغذاء',
    'منصة سحابية مدعومة بالذكاء الاصطناعي تمكّن منشآت الأغذية والمشروبات من إنشاء الأدلة التشغيلية ومراقبة الجودة وقياس الامتثال عبر تقارير وتحليلات ذكية.'),
 
+  (19, 'floraex', 'فلوراكس', 'Floraex', 'عبدالرحمن قدسي', 'المؤسس',
+   'الإطلاق المبكر', 'جدة', 'https://linkedin.com/in/abdulrhman-qudsi', 'قطاع تقنيات الغذاء',
+   'شركة سعودية ناشئة تطوّر وتصنّع حلول التنظيف والتطهير لقطاع الأغذية والمنشآت الحساسة، بمنتجات محلية تدعم سلامة الغذاء وتقلل الروائح الكيميائية والهدر.'),
+
   -- Company.pdf, page 1. Name and logo are all the source provides; the deck's
   -- profile fields (founder, stage, HQ, LinkedIn, sector, description) have no
   -- equivalent there, so they stay NULL until a profile slide exists.
-  (19, 'nkta', 'نقطة', 'NKTA', null, null,
+  (20, 'nkta', 'نقطة', 'NKTA', null, null,
    null, null, null, null, null)
 
 on conflict (slug) do update set
@@ -165,6 +133,48 @@ on conflict (slug) do update set
   sector       = excluded.sector,
   description  = excluded.description;
   -- access_code_hash and logo_url intentionally untouched on conflict.
+
+-- ---------------------------------------------------------------------------
+-- Post-seed advisory (reports only — changes nothing)
+-- ---------------------------------------------------------------------------
+-- An earlier revision of this file briefly treated نقطة as a REPLACEMENT for
+-- Floraex and removed it. A database seeded with that revision needs two things
+-- this file cannot decide on its own, so it reports them instead of guessing:
+--
+--   • a codeless startup cannot log in, and the INSERT above deliberately does
+--     not touch access_code_hash — run 05_issue_codes.sql (or
+--     deploy/03_issue_codes.sql) to issue one;
+--   • is_active is admin-owned state. If the old revision archived Floraex
+--     because it already had bookings, only an admin should decide to re-enable
+--     it, so this seed will not flip the flag behind their back.
+-- ---------------------------------------------------------------------------
+do $$
+declare
+  v_total    integer;
+  v_codeless integer;
+  v_names    text;
+begin
+  select count(*), count(*) filter (where access_code_hash is null)
+    into v_total, v_codeless from public.startups;
+
+  if v_codeless = v_total then
+    -- Fresh seed: nobody has a code yet, so naming all of them is just noise.
+    raise notice 'No access codes issued yet (% startups). Run 05_issue_codes.sql.', v_total;
+  elsif v_codeless > 0 then
+    -- The interesting case: a newly added company among already-issued ones.
+    select string_agg(name_en, ', ' order by sort_order) into v_names
+      from public.startups where access_code_hash is null;
+    raise notice 'Cannot log in — no access code yet: %. Run 05_issue_codes.sql; '
+                 'it only touches codeless rows, so existing codes stay valid.', v_names;
+  end if;
+
+  select string_agg(name_en, ', ' order by sort_order) into v_names
+    from public.startups where not is_active;
+  if v_names is not null then
+    raise notice 'Deactivated, hidden from booking: %. Re-enable in Admin → الشركات '
+                 'if that is not intended.', v_names;
+  end if;
+end $$;
 
 -- ==================== 02_mentors.sql ====================
 -- ============================================================================
@@ -390,6 +400,7 @@ update public.startups set logo_url = '/assets/startups/plstka.png' where slug =
 update public.startups set logo_url = '/assets/startups/hader.png' where slug = 'hader';
 update public.startups set logo_url = '/assets/startups/evinex.png' where slug = 'evinex';
 update public.startups set logo_url = '/assets/startups/oprato.png' where slug = 'oprato';
+update public.startups set logo_url = '/assets/startups/floraex.png' where slug = 'floraex';
 update public.startups set logo_url = '/assets/startups/nkta.png' where slug = 'nkta';
 update public.mentors set image_url = '/assets/mentors/sultan-alhayani.png' where slug = 'sultan-alhayani';
 update public.mentors set image_url = '/assets/mentors/abdulrahman-hariri.png' where slug = 'abdulrahman-hariri';
