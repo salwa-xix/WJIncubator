@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Extract the real image assets from the two source PDFs.
+Extract the real image assets from the three source PDFs.
 
 Produces:
   public/assets/mentors/<slug>.png          mentor portraits
@@ -14,9 +14,16 @@ each deck lays its cards on a fixed x-grid, and cards read right-to-left, so a
 portrait is assigned to a mentor by its x-centre. Organisation logos sit in a
 lower band and attach to whichever card centre they are nearest.
 
+Company.pdf is a later addendum with a different shape — one subject per page,
+one image per page, centred — so it gets its own simple pass rather than being
+forced through the two decks' grid logic. All three files are required: running
+with only the original two would quietly emit a seed missing نقطة's logo and
+two mentor portraits, which is exactly the kind of silence this script exists
+to avoid.
+
 Requires PyMuPDF:  pip install pymupdf
 
-  python3 scripts/extract_assets.py <startups.pdf> <mentors.pdf>
+  python3 scripts/extract_assets.py <startups.pdf> <mentors.pdf> <company.pdf>
 """
 import os
 import sys
@@ -44,11 +51,26 @@ MENTOR_PAGES = [
 ]
 
 # Startup profile slides, one per page, in page order.
+#
+# Stops at 18. The deck's page 19 is Floraex, which Company.pdf replaced with
+# نقطة — so that page is deliberately not read, and نقطة's logo comes from the
+# company pass below instead.
 STARTUP_PAGES = [
     "mabien", "nanoclean", "groupz", "mustahaq", "thella", "senoz-ai",
     "wound-care-ai", "dithar", "medirect", "juthoor", "stetholink",
     "cartiheal", "phagetech", "aquanova", "plstka", "hader", "evinex",
-    "oprato", "floraex",
+    "oprato",
+]
+
+# Company.pdf: one subject per page, in page order. `kind` picks the table the
+# generated UPDATE targets and the directory the image lands in.
+#
+# Page 3 (معاذ العديمي) carries a name and no image at all, so it has no entry
+# here — the mentor keeps image_url NULL and the card falls back to its initial.
+COMPANY_PAGES = [
+    (0, "startup", "nkta"),
+    (1, "mentor", "sultan-alhayani"),
+    (3, "mentor", "abdulrahman-hariri"),
 ]
 
 PAGE_W = 1440.0
@@ -80,9 +102,9 @@ def content_images(page):
 
 
 def main():
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 4:
         sys.exit(__doc__)
-    startups_pdf, mentors_pdf = sys.argv[1], sys.argv[2]
+    startups_pdf, mentors_pdf, company_pdf = sys.argv[1], sys.argv[2], sys.argv[3]
     os.makedirs(OUT_M, exist_ok=True)
     os.makedirs(OUT_S, exist_ok=True)
     updates, total = [], 0
@@ -155,6 +177,33 @@ def main():
             # image. Left NULL rather than substituting something invented.
             print(f"  ! no logo image on the {slug} slide — leaving logo_url NULL")
     doc.close()
+
+    # ---------------- Company.pdf addendum ----------------
+    # One image per page, centred, so there is nothing to disambiguate: take the
+    # single content image and fail loudly if the page ever stops matching that.
+    doc = fitz.open(company_pdf)
+    for pi, kind, slug in COMPANY_PAGES:
+        imgs = content_images(doc[pi])
+        if len(imgs) != 1:
+            print(f"  ! Company.pdf page {pi+1}: expected 1 image, found "
+                  f"{len(imgs)} — skipping {slug}")
+            continue
+        out_dir, table = (OUT_M, "mentors") if kind == "mentor" else (OUT_S, "startups")
+        column = "image_url" if kind == "mentor" else "logo_url"
+        total += save(doc, imgs[0]["xref"], os.path.join(out_dir, f"{slug}.png"))
+        updates.append(
+            f"update public.{table} set {column} = '/assets/{table}/{slug}.png' "
+            f"where slug = '{slug}';")
+    doc.close()
+
+    # Floraex's images belong to a company that is no longer on the roster.
+    # Deleting them here keeps public/assets/ a mirror of the seed rather than
+    # an append-only pile that nothing ever prunes.
+    for stale in ("floraex.png", "floraex-founder.png"):
+        path = os.path.join(OUT_S, stale)
+        if os.path.exists(path):
+            os.remove(path)
+            print(f"  - removed stale asset startups/{stale} (Floraex → نقطة)")
 
     with open(SEED, "w", encoding="utf-8") as fh:
         fh.write("-- ============================================================\n"

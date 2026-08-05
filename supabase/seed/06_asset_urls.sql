@@ -66,4 +66,6 @@ update public.startups set logo_url = '/assets/startups/plstka.png' where slug =
 update public.startups set logo_url = '/assets/startups/hader.png' where slug = 'hader';
 update public.startups set logo_url = '/assets/startups/evinex.png' where slug = 'evinex';
 update public.startups set logo_url = '/assets/startups/oprato.png' where slug = 'oprato';
-update public.startups set logo_url = '/assets/startups/floraex.png' where slug = 'floraex';
+update public.startups set logo_url = '/assets/startups/nkta.png' where slug = 'nkta';
+update public.mentors set image_url = '/assets/mentors/sultan-alhayani.png' where slug = 'sultan-alhayani';
+update public.mentors set image_url = '/assets/mentors/abdulrahman-hariri.png' where slug = 'abdulrahman-hariri';

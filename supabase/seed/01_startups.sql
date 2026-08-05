@@ -1,8 +1,14 @@
 -- ============================================================================
 -- SEED — Startups
 -- ============================================================================
--- Source of truth: Incubator_Startup_Profiles.pdf (19 pages, one per company).
--- Every field below is transcribed verbatim from that file. Nothing invented.
+-- Sources of truth:
+--   • Incubator_Startup_Profiles.pdf (19 pages, one per company) → rows 1–18
+--   • Company.pdf (page 1)                                       → row 19
+--
+-- Company.pdf replaces the deck's 19th company (Floraex / فلوراكس) with نقطة.
+-- It is a one-page cover carrying the name and logo only, so every other
+-- column on that row is NULL — the profile fields simply do not exist in the
+-- source yet. Every field below is transcribed verbatim. Nothing invented.
 --
 -- NOT set here: access_code_hash. Codes do not exist in any source file, so
 -- they are issued separately (see scripts/issue-codes.ts or
@@ -14,6 +20,42 @@
 --
 -- Idempotent: re-running updates the profile text and leaves codes untouched.
 -- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- Floraex → نقطة
+-- ---------------------------------------------------------------------------
+-- Removed rather than renamed in place. It is a different company, and reusing
+-- the row would silently carry over Floraex's founder, sector, description,
+-- logo and — the one that actually matters — its already-issued access code,
+-- handing نقطة a credential that was given to someone else.
+--
+-- Guarded, because bookings.startup_id is ON DELETE RESTRICT: if Floraex has
+-- already booked, an unguarded DELETE aborts the whole seed. In that case the
+-- row is archived instead, so the bookings stay auditable and the operator is
+-- told what to do about it.
+-- ---------------------------------------------------------------------------
+do $$
+declare
+  v_id       uuid;
+  v_bookings integer;
+begin
+  select id into v_id from public.startups where slug = 'floraex';
+  if v_id is null then
+    return;                                   -- already replaced; nothing to do
+  end if;
+
+  select count(*) into v_bookings from public.bookings where startup_id = v_id;
+
+  if v_bookings = 0 then
+    delete from public.startups where id = v_id;
+    raise notice 'Floraex removed — replaced by نقطة (no bookings existed).';
+  else
+    update public.startups set is_active = false where id = v_id;
+    raise notice 'Floraex has % booking(s), so it was archived (is_active = false) '
+                 'rather than deleted. Cancel those bookings and re-run this seed '
+                 'to remove the row outright.', v_bookings;
+  end if;
+end $$;
 
 insert into public.startups
   (sort_order, slug, name_ar, name_en, founder_name, founder_role, stage, hq, linkedin_url, sector, description)
@@ -90,9 +132,11 @@ values
    'الإطلاق المبكر', 'جدة', 'https://linkedin.com/in/marwan-raffa', 'قطاع تقنيات الغذاء',
    'منصة سحابية مدعومة بالذكاء الاصطناعي تمكّن منشآت الأغذية والمشروبات من إنشاء الأدلة التشغيلية ومراقبة الجودة وقياس الامتثال عبر تقارير وتحليلات ذكية.'),
 
-  (19, 'floraex', 'فلوراكس', 'Floraex', 'عبدالرحمن قدسي', 'المؤسس',
-   'الإطلاق المبكر', 'جدة', 'https://linkedin.com/in/abdulrhman-qudsi', 'قطاع تقنيات الغذاء',
-   'شركة سعودية ناشئة تطوّر وتصنّع حلول التنظيف والتطهير لقطاع الأغذية والمنشآت الحساسة، بمنتجات محلية تدعم سلامة الغذاء وتقلل الروائح الكيميائية والهدر.')
+  -- Company.pdf, page 1. Name and logo are all the source provides; the deck's
+  -- profile fields (founder, stage, HQ, LinkedIn, sector, description) have no
+  -- equivalent there, so they stay NULL until a profile slide exists.
+  (19, 'nkta', 'نقطة', 'NKTA', null, null,
+   null, null, null, null, null)
 
 on conflict (slug) do update set
   sort_order   = excluded.sort_order,

@@ -123,8 +123,12 @@ Regenerate assets from the source PDFs at any time:
 
 ```bash
 pip install pymupdf
-python3 scripts/extract_assets.py <startups.pdf> <mentors.pdf>
+python3 scripts/extract_assets.py <startups.pdf> <mentors.pdf> <company.pdf>
 ```
+
+All three files are required. `Company.pdf` supplies نقطة's logo and two of the
+three mentors added after the original decks, so running with only the first two
+would emit a seed that silently omits them.
 
 ---
 
@@ -283,17 +287,27 @@ Everything real comes from the uploaded source files. **Nothing is invented.**
 
 | Data | Source | Count |
 | ---- | ------ | ----- |
-| Startups | `Incubator_Startup_Profiles.pdf` | 19 |
-| Mentor profiles | `مرشدين المعسكر.pdf` | 14 |
-| Mentor organizations | same | 27 |
-| Images extracted | both PDFs | 59 |
+| Startups | `Incubator_Startup_Profiles.pdf` (pages 1–18) + `Company.pdf` | 19 |
+| Mentor profiles | `مرشدين المعسكر.pdf` (14) + `Company.pdf` (3) | 17 |
+| Mentor organizations | `مرشدين المعسكر.pdf` | 27 |
+| Images extracted | all three PDFs | 61 |
 
-Two known data-quality issues in the source are carried over **unchanged and
+`Company.pdf` is a later addendum. It adds three mentors
+(د. سلطان الحياني · معاذ العديمي · د. عبدالرحمن حريري) and replaces the deck's
+19th company, **Floraex / فلوراكس**, with **نقطة / NKTA**. Floraex is deleted
+rather than renamed, so نقطة never inherits its profile or its access code — see
+the guard at the top of `supabase/seed/01_startups.sql`.
+
+Known data-quality gaps in the sources are carried over **unchanged and
 flagged**, because correcting them is the organiser's decision:
 
 1. Six mentors share two duplicated placeholder bios
    (شودري / الخضير / المشجري, and القحطاني / الزبيري / يوسف).
 2. "سلطلن الزحوفي" is very likely a typo for "سلطان".
+3. `Company.pdf` is a cover page, not a profile deck. It gives no availability
+   for its three mentors, no bio or portrait for معاذ العديمي, and nothing but a
+   name and logo for نقطة. Those columns are NULL, not filled in with guesses —
+   every field that renders them treats NULL as "print nothing".
 
 CartiHeal's slide sets its wordmark in type rather than placing an image, so its
 `logo_url` is NULL rather than a substitute.
@@ -304,7 +318,7 @@ CartiHeal's slide sets its wordmark in type rather than placing an image, so its
 
 ```
 ├─ public/
-│  ├─ assets/           59 images extracted from the source PDFs
+│  ├─ assets/           61 images extracted from the source PDFs
 │  ├─ fonts/            IBM Plex Sans Arabic, subset-split (SIL OFL 1.1)
 │  └─ favicon.svg
 ├─ scripts/

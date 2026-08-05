@@ -23,14 +23,14 @@ language sql immutable as $$ select coalesce(p->>'code', case when (p->>'ok')::b
 do $$ begin raise notice E'\n=== SEED INTEGRITY ==='; end $$;
 
 select pg_temp.assert((select count(*) from public.startups) = 19, '19 startups seeded');
-select pg_temp.assert((select count(*) from public.mentors)  = 14, '14 mentor profiles seeded');
+select pg_temp.assert((select count(*) from public.mentors)  = 17, '17 mentor profiles seeded');
 select pg_temp.assert((select count(*) from public.mentor_organizations) = 27, '27 mentor organizations seeded');
 select pg_temp.assert((select count(distinct start_time) from public.slots) = 6, 'six 20-minute slots per mentor');
 select pg_temp.assert(
   (select array_agg(distinct to_char(start_time,'HH24:MI') order by to_char(start_time,'HH24:MI')) from public.slots)
    = array['17:00','17:20','17:40','18:00','18:20','18:40'],
   'slot times match the challenge schedule');
-select pg_temp.assert((select count(*) from public.slots) = 84, '84 slots (14 mentors x 6)');
+select pg_temp.assert((select count(*) from public.slots) = 102, '102 slots (17 mentors x 6)');
 select pg_temp.assert((select session_date is null from public.sessions limit 1), 'event date left configurable (NULL)');
 
 -- ---------------------------------------------------------------------------
@@ -166,8 +166,8 @@ select pg_temp.assert(
   'RULE: an inactive mentor receives no new bookings');
 
 select pg_temp.assert(
-  (select count(*) from jsonb_array_elements(public.get_startup_dashboard((select v from t where k='tok_b'))->'mentors')) = 13,
-  'startup view hides the deactivated mentor (13 of 14 visible)');
+  (select count(*) from jsonb_array_elements(public.get_startup_dashboard((select v from t where k='tok_b'))->'mentors')) = 16,
+  'startup view hides the deactivated mentor (16 of 17 visible)');
 
 select public.admin_set_session_mentor_active(
   public.current_session_id(), (select id from public.mentors where slug='muna-balhamar'), true);

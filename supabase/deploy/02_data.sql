@@ -16,8 +16,14 @@
 -- ============================================================================
 -- SEED — Startups
 -- ============================================================================
--- Source of truth: Incubator_Startup_Profiles.pdf (19 pages, one per company).
--- Every field below is transcribed verbatim from that file. Nothing invented.
+-- Sources of truth:
+--   • Incubator_Startup_Profiles.pdf (19 pages, one per company) → rows 1–18
+--   • Company.pdf (page 1)                                       → row 19
+--
+-- Company.pdf replaces the deck's 19th company (Floraex / فلوراكس) with نقطة.
+-- It is a one-page cover carrying the name and logo only, so every other
+-- column on that row is NULL — the profile fields simply do not exist in the
+-- source yet. Every field below is transcribed verbatim. Nothing invented.
 --
 -- NOT set here: access_code_hash. Codes do not exist in any source file, so
 -- they are issued separately (see scripts/issue-codes.ts or
@@ -29,6 +35,42 @@
 --
 -- Idempotent: re-running updates the profile text and leaves codes untouched.
 -- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- Floraex → نقطة
+-- ---------------------------------------------------------------------------
+-- Removed rather than renamed in place. It is a different company, and reusing
+-- the row would silently carry over Floraex's founder, sector, description,
+-- logo and — the one that actually matters — its already-issued access code,
+-- handing نقطة a credential that was given to someone else.
+--
+-- Guarded, because bookings.startup_id is ON DELETE RESTRICT: if Floraex has
+-- already booked, an unguarded DELETE aborts the whole seed. In that case the
+-- row is archived instead, so the bookings stay auditable and the operator is
+-- told what to do about it.
+-- ---------------------------------------------------------------------------
+do $$
+declare
+  v_id       uuid;
+  v_bookings integer;
+begin
+  select id into v_id from public.startups where slug = 'floraex';
+  if v_id is null then
+    return;                                   -- already replaced; nothing to do
+  end if;
+
+  select count(*) into v_bookings from public.bookings where startup_id = v_id;
+
+  if v_bookings = 0 then
+    delete from public.startups where id = v_id;
+    raise notice 'Floraex removed — replaced by نقطة (no bookings existed).';
+  else
+    update public.startups set is_active = false where id = v_id;
+    raise notice 'Floraex has % booking(s), so it was archived (is_active = false) '
+                 'rather than deleted. Cancel those bookings and re-run this seed '
+                 'to remove the row outright.', v_bookings;
+  end if;
+end $$;
 
 insert into public.startups
   (sort_order, slug, name_ar, name_en, founder_name, founder_role, stage, hq, linkedin_url, sector, description)
@@ -105,9 +147,11 @@ values
    'الإطلاق المبكر', 'جدة', 'https://linkedin.com/in/marwan-raffa', 'قطاع تقنيات الغذاء',
    'منصة سحابية مدعومة بالذكاء الاصطناعي تمكّن منشآت الأغذية والمشروبات من إنشاء الأدلة التشغيلية ومراقبة الجودة وقياس الامتثال عبر تقارير وتحليلات ذكية.'),
 
-  (19, 'floraex', 'فلوراكس', 'Floraex', 'عبدالرحمن قدسي', 'المؤسس',
-   'الإطلاق المبكر', 'جدة', 'https://linkedin.com/in/abdulrhman-qudsi', 'قطاع تقنيات الغذاء',
-   'شركة سعودية ناشئة تطوّر وتصنّع حلول التنظيف والتطهير لقطاع الأغذية والمنشآت الحساسة، بمنتجات محلية تدعم سلامة الغذاء وتقلل الروائح الكيميائية والهدر.')
+  -- Company.pdf, page 1. Name and logo are all the source provides; the deck's
+  -- profile fields (founder, stage, HQ, LinkedIn, sector, description) have no
+  -- equivalent there, so they stay NULL until a profile slide exists.
+  (19, 'nkta', 'نقطة', 'NKTA', null, null,
+   null, null, null, null, null)
 
 on conflict (slug) do update set
   sort_order   = excluded.sort_order,
@@ -126,20 +170,31 @@ on conflict (slug) do update set
 -- ============================================================================
 -- SEED — Mentors
 -- ============================================================================
--- Source of truth: مرشدين المعسكر.pdf (4 pages, 14 mentor cards).
--- All 14 profiles are seeded. Which of them take part in a given event is an
+-- Sources of truth:
+--   • مرشدين المعسكر.pdf (4 pages, 14 mentor cards)      → sort_order 1–14
+--   • Company.pdf        (pages 2–4, 3 mentor cards)      → sort_order 15–17
+--
+-- All 17 profiles are seeded. Which of them take part in a given event is an
 -- ADMIN decision recorded in session_mentors — never a filter applied here,
 -- and never inferred from availability_label.
 --
 -- `availability_label` is transcribed verbatim ("الخميس 5–7", "فترتين",
 -- "السبت"). It is display metadata; no code branches on it.
 --
--- Two known data-quality issues in the source, carried over UNCHANGED and
--- flagged rather than silently corrected:
+-- Data-quality issues in the sources, carried over UNCHANGED and flagged
+-- rather than silently corrected:
 --   1. Six mentors share two duplicated placeholder bios (شودري/الخضير/المشجري
 --      and القحطاني/الزبيري/يوسف). They read as unfilled template copy.
 --   2. "سلطلن الزحوفي" is very likely a typo for "سلطان". Seeded as printed.
--- Correcting either is a content decision for the organiser, not ours.
+--   3. Company.pdf prints no availability for its three mentors and no bio at
+--      all for معاذ العديمي — left NULL rather than invented. The card renders
+--      both as optional, so a NULL simply prints nothing.
+-- Correcting any of these is a content decision for the organiser, not ours.
+--
+-- Company.pdf's unhamzated spellings ("ادفانس", "الاسترالية", "الادارة",
+-- "للإبتكار") are kept as printed. What IS repaired is that file's broken text
+-- layer: it emits lam-alef ligatures reversed and floats the fathatan of
+-- "ايضاً" to the head of its line. Those are extraction defects, not content.
 --
 -- image_url is populated by the asset extraction script, so no row ever points
 -- at a file that does not exist yet.
@@ -187,7 +242,18 @@ values
    'قيادي في مجال الابتكار والتقنية، بخبرة طويلة في بناء المشاريع الناشئة والمنتجات المدعومة بالذكاء الاصطناعي.'),
 
   (14, 'omran-yousef', 'عمران يوسف', 'الخميس 5–7',
-   'مستشار استراتيجي في القطاعين العام والخاص، ورائد أعمال شغوف ببناء منتجات وشركات ذات أثر واسع تسهم في تمكين الأفراد، مع التركيز على ابتكار حلول مستدامة تدعم التنمية وتعزز الأثر الاقتصادي والاجتماعي.')
+   'مستشار استراتيجي في القطاعين العام والخاص، ورائد أعمال شغوف ببناء منتجات وشركات ذات أثر واسع تسهم في تمكين الأفراد، مع التركيز على ابتكار حلول مستدامة تدعم التنمية وتعزز الأثر الاقتصادي والاجتماعي.'),
+
+  -- ---- Company.pdf, in page order (pages 2, 3, 4) --------------------------
+  (15, 'sultan-alhayani', 'د. سلطان الحياني', null,
+   'المؤسس والرئيس التنفيذي لشركة بيور ادفانس، يشغل ايضاً منصب مستشار قطاع التقنية الحيوية في مجمع وادي جدة للإبتكار، وأستاذ مشارك في الكيمياء الحيوية بجامعة الملك عبدالعزيز، حاصل على درجة الدكتوراه في كيمياء المناعة من جامعة موناش الاسترالية و ماجستير الادارة العامة من جامعة هارفارد.'),
+
+  -- The source page carries this name and nothing else — no bio, no portrait.
+  (16, 'muath-aladimi', 'معاذ العديمي', null, null),
+
+  -- Three bullet points on the source page, joined into the single bio field.
+  (17, 'abdulrahman-hariri', 'د. عبدالرحمن حريري', null,
+   'مؤسس Innovation Ventures، وهي شركة تعنى بتطوير حلول وبرامج فريدة لخدمة منظومة الابتكار وريادة الأعمال. مطوّر حلول تقنية باستخدام تقنيات وأدوات No Code و No Code Ai. مؤسس Payflowly، وهي خدمة تُمكّن الشركات الناشئة من تطوير واختبار الربط ببوابات الدفع وتقديم خدمات أخرى ذات قيمة، مع دمج سريع مع بوابات الدفع الرائدة.')
 
 on conflict (slug) do update set
   sort_order         = excluded.sort_order,
@@ -324,7 +390,9 @@ update public.startups set logo_url = '/assets/startups/plstka.png' where slug =
 update public.startups set logo_url = '/assets/startups/hader.png' where slug = 'hader';
 update public.startups set logo_url = '/assets/startups/evinex.png' where slug = 'evinex';
 update public.startups set logo_url = '/assets/startups/oprato.png' where slug = 'oprato';
-update public.startups set logo_url = '/assets/startups/floraex.png' where slug = 'floraex';
+update public.startups set logo_url = '/assets/startups/nkta.png' where slug = 'nkta';
+update public.mentors set image_url = '/assets/mentors/sultan-alhayani.png' where slug = 'sultan-alhayani';
+update public.mentors set image_url = '/assets/mentors/abdulrahman-hariri.png' where slug = 'abdulrahman-hariri';
 
 -- ==================== session (draft, no date) ====================
 -- Rewritten from 04_session.sql for the SQL Editor: the original uses psql

@@ -10,7 +10,7 @@
 --
 -- Everything past this point is an admin decision made in the UI, because the
 -- roster and the schedule are operational choices that change per event. A
--- seed that pre-activated 14 mentors and pre-generated 84 slots would be
+-- seed that pre-activated 17 mentors and pre-generated 102 slots would be
 -- inventing the event's shape.
 --
 -- The starts_at / ends_at / slot_minutes values below are the DEFAULTS the

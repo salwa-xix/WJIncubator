@@ -1,20 +1,31 @@
 -- ============================================================================
 -- SEED — Mentors
 -- ============================================================================
--- Source of truth: مرشدين المعسكر.pdf (4 pages, 14 mentor cards).
--- All 14 profiles are seeded. Which of them take part in a given event is an
+-- Sources of truth:
+--   • مرشدين المعسكر.pdf (4 pages, 14 mentor cards)      → sort_order 1–14
+--   • Company.pdf        (pages 2–4, 3 mentor cards)      → sort_order 15–17
+--
+-- All 17 profiles are seeded. Which of them take part in a given event is an
 -- ADMIN decision recorded in session_mentors — never a filter applied here,
 -- and never inferred from availability_label.
 --
 -- `availability_label` is transcribed verbatim ("الخميس 5–7", "فترتين",
 -- "السبت"). It is display metadata; no code branches on it.
 --
--- Two known data-quality issues in the source, carried over UNCHANGED and
--- flagged rather than silently corrected:
+-- Data-quality issues in the sources, carried over UNCHANGED and flagged
+-- rather than silently corrected:
 --   1. Six mentors share two duplicated placeholder bios (شودري/الخضير/المشجري
 --      and القحطاني/الزبيري/يوسف). They read as unfilled template copy.
 --   2. "سلطلن الزحوفي" is very likely a typo for "سلطان". Seeded as printed.
--- Correcting either is a content decision for the organiser, not ours.
+--   3. Company.pdf prints no availability for its three mentors and no bio at
+--      all for معاذ العديمي — left NULL rather than invented. The card renders
+--      both as optional, so a NULL simply prints nothing.
+-- Correcting any of these is a content decision for the organiser, not ours.
+--
+-- Company.pdf's unhamzated spellings ("ادفانس", "الاسترالية", "الادارة",
+-- "للإبتكار") are kept as printed. What IS repaired is that file's broken text
+-- layer: it emits lam-alef ligatures reversed and floats the fathatan of
+-- "ايضاً" to the head of its line. Those are extraction defects, not content.
 --
 -- image_url is populated by the asset extraction script, so no row ever points
 -- at a file that does not exist yet.
@@ -62,7 +73,18 @@ values
    'قيادي في مجال الابتكار والتقنية، بخبرة طويلة في بناء المشاريع الناشئة والمنتجات المدعومة بالذكاء الاصطناعي.'),
 
   (14, 'omran-yousef', 'عمران يوسف', 'الخميس 5–7',
-   'مستشار استراتيجي في القطاعين العام والخاص، ورائد أعمال شغوف ببناء منتجات وشركات ذات أثر واسع تسهم في تمكين الأفراد، مع التركيز على ابتكار حلول مستدامة تدعم التنمية وتعزز الأثر الاقتصادي والاجتماعي.')
+   'مستشار استراتيجي في القطاعين العام والخاص، ورائد أعمال شغوف ببناء منتجات وشركات ذات أثر واسع تسهم في تمكين الأفراد، مع التركيز على ابتكار حلول مستدامة تدعم التنمية وتعزز الأثر الاقتصادي والاجتماعي.'),
+
+  -- ---- Company.pdf, in page order (pages 2, 3, 4) --------------------------
+  (15, 'sultan-alhayani', 'د. سلطان الحياني', null,
+   'المؤسس والرئيس التنفيذي لشركة بيور ادفانس، يشغل ايضاً منصب مستشار قطاع التقنية الحيوية في مجمع وادي جدة للإبتكار، وأستاذ مشارك في الكيمياء الحيوية بجامعة الملك عبدالعزيز، حاصل على درجة الدكتوراه في كيمياء المناعة من جامعة موناش الاسترالية و ماجستير الادارة العامة من جامعة هارفارد.'),
+
+  -- The source page carries this name and nothing else — no bio, no portrait.
+  (16, 'muath-aladimi', 'معاذ العديمي', null, null),
+
+  -- Three bullet points on the source page, joined into the single bio field.
+  (17, 'abdulrahman-hariri', 'د. عبدالرحمن حريري', null,
+   'مؤسس Innovation Ventures، وهي شركة تعنى بتطوير حلول وبرامج فريدة لخدمة منظومة الابتكار وريادة الأعمال. مطوّر حلول تقنية باستخدام تقنيات وأدوات No Code و No Code Ai. مؤسس Payflowly، وهي خدمة تُمكّن الشركات الناشئة من تطوير واختبار الربط ببوابات الدفع وتقديم خدمات أخرى ذات قيمة، مع دمج سريع مع بوابات الدفع الرائدة.')
 
 on conflict (slug) do update set
   sort_order         = excluded.sort_order,

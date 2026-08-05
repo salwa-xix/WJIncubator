@@ -6,8 +6,8 @@
 --
 -- This is exactly the work the ADMIN does in production through the UI —
 -- assigning mentors and generating slots. Reproducing it here as a fixture is
--- what keeps it out of the production seed, where pre-activating 14 mentors
--- and 84 slots would be inventing the event's shape.
+-- what keeps it out of the production seed, where pre-activating 17 mentors
+-- and 102 slots would be inventing the event's shape.
 --
 -- Run by scripts/db-test.sh only.
 -- ============================================================================
