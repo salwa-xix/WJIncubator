@@ -9,8 +9,14 @@
 -- ADMIN decision recorded in session_mentors — never a filter applied here,
 -- and never inferred from availability_label.
 --
--- `availability_label` is transcribed verbatim ("الخميس 5–7", "فترتين",
--- "السبت"). It is display metadata; no code branches on it.
+-- `availability_label` is display metadata only; no code branches on it. It was
+-- transcribed verbatim from the decks, but "فترتين" and "السبت" are dropped at
+-- the organiser's request — they are internal scheduling shorthand and read as
+-- noise on a public mentor card, especially now that the card sits directly
+-- above the real generated slot times. NULL renders as nothing.
+--
+-- "الخميس 5–7" is deliberately KEPT (5 mentors): it names an actual time rather
+-- than a planning bucket. Drop it the same way if that changes.
 --
 -- Data-quality issues in the sources, carried over UNCHANGED and flagged
 -- rather than silently corrected:
@@ -39,37 +45,37 @@ values
   (2, 'anas-alsufyani', 'أنس السفياني', 'الخميس 5–7',
    'رائد أعمال متسلسل بخبرة تتجاوز ١٣ عامًا في تأسيس المشاريع، متخصص في نماذج الأعمال والتحقق من الأفكار واستراتيجيات النمو والاستثمار المبكر.'),
 
-  (3, 'abduljawad-chowdhry', 'عبدالجواد شودري', 'فترتين',
+  (3, 'abduljawad-chowdhry', 'عبدالجواد شودري', null,
    'رائد أعمال تقني في مجال الموارد المؤسساتية والتقنيات الصحية.'),
 
-  (4, 'abdullah-nobar', 'عبدالله نوبار', 'فترتين',
+  (4, 'abdullah-nobar', 'عبدالله نوبار', null,
    'قبل سنة كنت أكره الـAI واليوم أنا مهندس ذكاء اصطناعي، وأغلب عملي يصير عبر الـAI Agents، مو مجرد ديمو، هذي طريقتي الأساسية في البناء.'),
 
-  (5, 'muna-balhamar', 'منى بلحمر', 'السبت',
+  (5, 'muna-balhamar', 'منى بلحمر', null,
    'رائدة أعمال ومستثمرة، تمتلك خبرة واسعة في ريادة الأعمال، وبناء الشركات، وتطوير نماذج الأعمال والاستراتيجيات، كما تركز على دعم الاقتصاد الحر وتمكين الكفاءات المحلية.'),
 
-  (6, 'khalid-alkhudair', 'خالد الخضير', 'فترتين',
+  (6, 'khalid-alkhudair', 'خالد الخضير', null,
    'رائد أعمال تقني في مجال الموارد المؤسساتية والتقنيات الصحية.'),
 
   (7, 'abdullah-alqahtani', 'عبدالله القحطاني', 'الخميس 5–7',
    'مستشار استراتيجي في القطاعين العام والخاص، ورائد أعمال شغوف ببناء منتجات وشركات ذات أثر واسع تسهم في تمكين الأفراد، مع التركيز على ابتكار حلول مستدامة تدعم التنمية وتعزز الأثر الاقتصادي والاجتماعي.'),
 
-  (8, 'yazeed-almutairi', 'يزيد المطيري', 'فترتين',
+  (8, 'yazeed-almutairi', 'يزيد المطيري', null,
    'أخصائي أول تطوير أعمال في وادي جدة، ورائد أعمال سابق في قطاع التقنية العميقة.'),
 
-  (9, 'sultan-alzahoufi', 'سلطلن الزحوفي', 'السبت',
+  (9, 'sultan-alzahoufi', 'سلطلن الزحوفي', null,
    'خبرة قيادية ١٣ سنة في أرامكو ومع أبرز الشركات الناشئة الرياضية، بالإضافة إلى خبرات في التشغيل والتطوير وبناء نماذج أعمال مع التركيز على تحقيق الإيرادات.'),
 
-  (10, 'mohammed-almashjari', 'محمد المشجري', 'فترتين',
+  (10, 'mohammed-almashjari', 'محمد المشجري', null,
    'رائد أعمال تقني في مجال الموارد المؤسساتية والتقنيات الصحية.'),
 
   (11, 'ahmed-alzubairi', 'أحمد الزبيري', 'الخميس 5–7',
    'مستشار استراتيجي في القطاعين العام والخاص، ورائد أعمال شغوف ببناء منتجات وشركات ذات أثر واسع تسهم في تمكين الأفراد، مع التركيز على ابتكار حلول مستدامة تدعم التنمية وتعزز الأثر الاقتصادي والاجتماعي.'),
 
-  (12, 'amin-ramadan', 'امين رمضان', 'فترتين',
+  (12, 'amin-ramadan', 'امين رمضان', null,
    'الشريك الإداري في مجموعة عزوة الدعم القابضة، وهي استوديو مؤسسي لبناء الشركات يعمل على تأسيس الشركات وهيكلتها وفق المعايير التي يعترف بها رأس المال المؤسسي.'),
 
-  (13, 'adel-alsaedi', 'عادل الصاعدي', 'فترتين',
+  (13, 'adel-alsaedi', 'عادل الصاعدي', null,
    'قيادي في مجال الابتكار والتقنية، بخبرة طويلة في بناء المشاريع الناشئة والمنتجات المدعومة بالذكاء الاصطناعي.'),
 
   (14, 'omran-yousef', 'عمران يوسف', 'الخميس 5–7',
