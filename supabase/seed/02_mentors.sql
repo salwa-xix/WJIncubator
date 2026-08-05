@@ -9,14 +9,17 @@
 -- ADMIN decision recorded in session_mentors — never a filter applied here,
 -- and never inferred from availability_label.
 --
--- `availability_label` is display metadata only; no code branches on it. It was
--- transcribed verbatim from the decks, but "فترتين" and "السبت" are dropped at
--- the organiser's request — they are internal scheduling shorthand and read as
--- noise on a public mentor card, especially now that the card sits directly
--- above the real generated slot times. NULL renders as nothing.
+-- `availability_label` is NULL for every mentor, at the organiser's request. The
+-- decks printed "الخميس 5–7", "فترتين" and "السبت"; none of them survive here.
+-- They described the planning grid, not something a startup can act on, and the
+-- card prints them directly above the real generated slot times — which are the
+-- actual answer to "when can I book this mentor?" — so they only competed with
+-- it.
 --
--- "الخميس 5–7" is deliberately KEPT (5 mentors): it names an actual time rather
--- than a planning bucket. Drop it the same way if that changes.
+-- The column and its rendering are kept on purpose. It is display-only metadata
+-- that nothing branches on, MentorCard omits the element when it is NULL, and an
+-- admin may want a label back for a future event. Seeding NULL empties it
+-- without removing the capability.
 --
 -- Data-quality issues in the sources, carried over UNCHANGED and flagged
 -- rather than silently corrected:
@@ -39,10 +42,10 @@
 
 insert into public.mentors (sort_order, slug, name_ar, availability_label, bio)
 values
-  (1, 'basma-khoja', 'د. بسمة خوجة', 'الخميس 5–7',
+  (1, 'basma-khoja', 'د. بسمة خوجة', null,
    'مديرة حاضنات ومسرّعات الأعمال في جامعة الملك عبدالعزيز، ومستشارة في وادي جدة.'),
 
-  (2, 'anas-alsufyani', 'أنس السفياني', 'الخميس 5–7',
+  (2, 'anas-alsufyani', 'أنس السفياني', null,
    'رائد أعمال متسلسل بخبرة تتجاوز ١٣ عامًا في تأسيس المشاريع، متخصص في نماذج الأعمال والتحقق من الأفكار واستراتيجيات النمو والاستثمار المبكر.'),
 
   (3, 'abduljawad-chowdhry', 'عبدالجواد شودري', null,
@@ -57,7 +60,7 @@ values
   (6, 'khalid-alkhudair', 'خالد الخضير', null,
    'رائد أعمال تقني في مجال الموارد المؤسساتية والتقنيات الصحية.'),
 
-  (7, 'abdullah-alqahtani', 'عبدالله القحطاني', 'الخميس 5–7',
+  (7, 'abdullah-alqahtani', 'عبدالله القحطاني', null,
    'مستشار استراتيجي في القطاعين العام والخاص، ورائد أعمال شغوف ببناء منتجات وشركات ذات أثر واسع تسهم في تمكين الأفراد، مع التركيز على ابتكار حلول مستدامة تدعم التنمية وتعزز الأثر الاقتصادي والاجتماعي.'),
 
   (8, 'yazeed-almutairi', 'يزيد المطيري', null,
@@ -69,7 +72,7 @@ values
   (10, 'mohammed-almashjari', 'محمد المشجري', null,
    'رائد أعمال تقني في مجال الموارد المؤسساتية والتقنيات الصحية.'),
 
-  (11, 'ahmed-alzubairi', 'أحمد الزبيري', 'الخميس 5–7',
+  (11, 'ahmed-alzubairi', 'أحمد الزبيري', null,
    'مستشار استراتيجي في القطاعين العام والخاص، ورائد أعمال شغوف ببناء منتجات وشركات ذات أثر واسع تسهم في تمكين الأفراد، مع التركيز على ابتكار حلول مستدامة تدعم التنمية وتعزز الأثر الاقتصادي والاجتماعي.'),
 
   (12, 'amin-ramadan', 'امين رمضان', null,
@@ -78,7 +81,7 @@ values
   (13, 'adel-alsaedi', 'عادل الصاعدي', null,
    'قيادي في مجال الابتكار والتقنية، بخبرة طويلة في بناء المشاريع الناشئة والمنتجات المدعومة بالذكاء الاصطناعي.'),
 
-  (14, 'omran-yousef', 'عمران يوسف', 'الخميس 5–7',
+  (14, 'omran-yousef', 'عمران يوسف', null,
    'مستشار استراتيجي في القطاعين العام والخاص، ورائد أعمال شغوف ببناء منتجات وشركات ذات أثر واسع تسهم في تمكين الأفراد، مع التركيز على ابتكار حلول مستدامة تدعم التنمية وتعزز الأثر الاقتصادي والاجتماعي.'),
 
   -- ---- Company.pdf, in page order (pages 2, 3, 4) --------------------------
